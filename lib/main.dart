@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:multi_sem13/note_view.dart';
+import 'package:multi_sem13/student_view.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Notes App',
+      title: 'Aplicación de Estudiantes',
       theme: ThemeData.dark(),
-      home: const NotesView(),
+      home: const StudentsView(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -1,10 +1,18 @@
 {
   "cSpell.ignoreWords": [
+    "AUTOINCREMENT",
+    "Ingreso",
     "además",
     "ayuda",
+    "carrera",
     "crea",
     "datos",
     "deserializar",
+    "edad",
+    "estudiantes",
+    "fecha",
+    "ingreso",
+    "nombre",
     "operaciones",
     "realizar",
     "serializar"
