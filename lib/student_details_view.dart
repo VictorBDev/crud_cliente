@@ -110,16 +110,23 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
                     ),
-                    decoration: const InputDecoration(
-                      hintText: 'Nombre',
+                    decoration: InputDecoration(
+                      hintText: 'Ingrese su nombre',
                       border: InputBorder.none,
                       hintStyle: TextStyle(
-                        color: Colors.white,
+                        //Hint text opacity
+                        color: Colors.white.withOpacity(0.2),
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
                       ),
+                      //Background opacity
+                      fillColor: Colors.white.withOpacity(0.1),
+                      filled: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     ),
                   ),
+                  SizedBox(height: 10), // Add this line
                   TextField(
                     controller: majorController,
                     cursorColor: Colors.white,
@@ -127,15 +134,20 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
                       color: Colors.white,
                       fontSize: 20,
                     ),
-                    decoration: const InputDecoration(
-                      hintText: 'Carrera',
+                    decoration: InputDecoration(
+                      hintText: 'Ingrese su carrera',
                       border: InputBorder.none,
                       hintStyle: TextStyle(
-                        color: Colors.white,
+                        color: Colors.white.withOpacity(0.2),
                         fontSize: 20,
                       ),
+                      fillColor: Colors.white.withOpacity(0.1),
+                      filled: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     ),
                   ),
+                  SizedBox(height: 10),
                   TextField(
                     controller: ageController,
                     cursorColor: Colors.white,
@@ -143,12 +155,18 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
                       color: Colors.white,
                       fontSize: 20,
                     ),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Ingrese su edad',
                       border: InputBorder.none,
                       hintStyle: TextStyle(
-                        color: Colors.white,
+                        color: Colors.white.withOpacity(0.2),
                         fontSize: 20,
+                      ),
+                      fillColor: Colors.white.withOpacity(0.1),
+                      filled: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
                       ),
                     ),
                     keyboardType: TextInputType.number,

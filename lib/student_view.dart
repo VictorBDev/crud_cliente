@@ -82,7 +82,7 @@ class _StudentsViewState extends State<StudentsView> {
                                 student.fechaIngreso.toString().split(' ')[0],
                               ),
                               Text(
-                                student.nombre,
+                                'Nombre: ${student.nombre}',
                                 style:
                                     Theme.of(context).textTheme.headlineMedium,
                               ),
