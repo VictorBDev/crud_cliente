@@ -1,6 +1,3 @@
-// import 'package:sqflite/sqflite.dart';
-// import 'package:path/path.dart';
-
 class StudentFields {
   static const List<String> values = [
     id,
