@@ -24,6 +24,7 @@ class StudentModel {
   final String carrera;
   final int? edad;
   final DateTime? fechaIngreso;
+
   StudentModel({
     this.id,
     required this.nombre,
@@ -31,6 +32,7 @@ class StudentModel {
     this.edad,
     required this.fechaIngreso,
   });
+
   Map<String, Object?> toJson() => {
         StudentFields.id: id,
         StudentFields.nombre: nombre,
@@ -39,13 +41,14 @@ class StudentModel {
         StudentFields.fechaIngreso: fechaIngreso?.toIso8601String(),
       };
 
-  factory StudentModel.fromJson(Map<String, Object?> json) => StudentModel(
+  factory StudentModel.fromJson(Map<String, dynamic> json) => StudentModel(
         id: json[StudentFields.id] as int?,
         nombre: json[StudentFields.nombre] as String,
         carrera: json[StudentFields.carrera] as String,
         edad: json[StudentFields.edad] as int?,
-        fechaIngreso: DateTime.tryParse(
-            json[StudentFields.fechaIngreso] as String? ?? ''),
+        fechaIngreso: json[StudentFields.fechaIngreso] != null
+            ? DateTime.parse(json[StudentFields.fechaIngreso] as String)
+            : null,
       );
 
   StudentModel copy({
@@ -62,4 +65,23 @@ class StudentModel {
         edad: edad ?? this.edad,
         fechaIngreso: fechaIngreso ?? this.fechaIngreso,
       );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StudentModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          nombre == other.nombre &&
+          carrera == other.carrera &&
+          edad == other.edad &&
+          fechaIngreso == other.fechaIngreso;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      nombre.hashCode ^
+      carrera.hashCode ^
+      edad.hashCode ^
+      fechaIngreso.hashCode;
 }

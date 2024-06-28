@@ -1,10 +1,17 @@
 {
   "cSpell.ignoreWords": [
     "AUTOINCREMENT",
+    "Actualizar",
     "Añadir",
+    "Editar",
+    "Enviar",
     "Estudiante",
+    "Ingrese",
     "Ingreso",
     "Lista",
+    "Nuevo",
+    "Obtener",
+    "Sincronizar",
     "además",
     "ayuda",
     "carrera",
@@ -13,11 +20,17 @@
     "deserializar",
     "edad",
     "estudiantes",
+    "están",
     "fecha",
     "ingreso",
+    "localmente",
+    "modelo",
     "nombre",
+    "objeto",
     "operaciones",
     "realizar",
-    "serializar"
+    "serializar",
+    "servidor",
+    "sqflite"
   ]
 }

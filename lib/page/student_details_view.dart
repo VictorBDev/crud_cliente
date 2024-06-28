@@ -1,80 +1,100 @@
 import 'package:flutter/material.dart';
-import 'package:multi_sem13/student.dart';
-import 'package:multi_sem13/student_database.dart';
+import 'package:multi_sem13/model/student.dart';
+import 'package:multi_sem13/data/student_database.dart';
 
 class StudentDetailsView extends StatefulWidget {
-  const StudentDetailsView({Key? key, this.studentId}) : super(key: key);
   final int? studentId;
 
+  const StudentDetailsView({Key? key, this.studentId}) : super(key: key);
+
   @override
-  State<StudentDetailsView> createState() => _StudentDetailsViewState();
+  _StudentDetailsViewState createState() => _StudentDetailsViewState();
 }
 
 class _StudentDetailsViewState extends State<StudentDetailsView> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _majorController;
+  late TextEditingController _ageController;
+
   StudentDatabase studentDatabase = StudentDatabase.instance;
-
-  TextEditingController nameController = TextEditingController();
-  TextEditingController majorController = TextEditingController();
-  TextEditingController ageController = TextEditingController();
-
-  late StudentModel student;
   bool isLoading = false;
   bool isNewStudent = false;
+  late StudentModel student;
 
   @override
   void initState() {
-    refreshStudent();
     super.initState();
+    isNewStudent = widget.studentId == null;
+    _nameController = TextEditingController();
+    _majorController = TextEditingController();
+    _ageController = TextEditingController();
+    if (!isNewStudent) {
+      loadStudent();
+    }
   }
 
-  refreshStudent() {
-    if (widget.studentId == null) {
-      setState(() {
-        isNewStudent = true;
-        student = StudentModel(
-          nombre: '',
-          carrera: '',
-          edad: 0,
+  void loadStudent() async {
+    setState(() => isLoading = true);
+    try {
+      student = await studentDatabase.readAll().then(
+            (students) => students.firstWhere((s) => s.id == widget.studentId),
+          );
+      _nameController.text = student.nombre;
+      _majorController.text = student.carrera;
+      _ageController.text = student.edad.toString();
+    } catch (e) {
+      print('Error loading student: $e');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> saveStudent() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => isLoading = true);
+      try {
+        final studentModel = StudentModel(
+          id: isNewStudent ? null : student.id,
+          nombre: _nameController.text,
+          carrera: _majorController.text,
+          edad: int.parse(_ageController.text),
           fechaIngreso: DateTime.now(),
         );
-      });
-      return;
+
+        if (isNewStudent) {
+          await studentDatabase.create(studentModel);
+        } else {
+          await studentDatabase.update(studentModel);
+        }
+
+        await studentDatabase.syncWithServer();
+        Navigator.pop(context, true);
+      } catch (e) {
+        print('Error saving student: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving student: $e')),
+        );
+      } finally {
+        setState(() => isLoading = false);
+      }
     }
-    studentDatabase.read(widget.studentId!).then((value) {
-      setState(() {
-        student = value;
-        nameController.text = student.nombre;
-        majorController.text = student.carrera;
-        ageController.text = student.edad?.toString() ?? '';
-      });
-    });
   }
 
-  saveStudent() async {
-    setState(() {
-      isLoading = true;
-    });
-    final model = StudentModel(
-      id: isNewStudent ? null : student.id,
-      nombre: nameController.text,
-      carrera: majorController.text,
-      edad: int.tryParse(ageController.text) ?? 0,
-      fechaIngreso: DateTime.now(),
-    );
-    if (isNewStudent) {
-      await studentDatabase.create(model);
-    } else {
-      await studentDatabase.update(model);
+  Future<void> deleteStudent() async {
+    setState(() => isLoading = true);
+    try {
+      await studentDatabase.delete(student.id!);
+      await studentDatabase.syncWithServer();
+      Navigator.pop(context, true);
+    } catch (e) {
+      print('Error deleting student: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting student: $e')),
+      );
+    } finally {
+      setState(() => isLoading = false);
     }
-    setState(() {
-      isLoading = false;
-    });
-    Navigator.pop(context);
-  }
-
-  deleteStudent() async {
-    await studentDatabase.delete(student.id!);
-    Navigator.pop(context);
   }
 
   @override
