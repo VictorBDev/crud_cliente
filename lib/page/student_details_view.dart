@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:multi_sem13/student.dart';
-import 'package:multi_sem13/student_database.dart';
+import 'package:multi_sem13/model/student.dart';
+import 'package:multi_sem13/data/student_database.dart';
 
 class StudentDetailsView extends StatefulWidget {
   const StudentDetailsView({Key? key, this.studentId}) : super(key: key);
@@ -27,7 +27,8 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
     super.initState();
   }
 
-  refreshStudent() {
+  refreshStudent() async {
+    setState(() => isLoading = true);
     if (widget.studentId == null) {
       setState(() {
         isNewStudent = true;
@@ -37,44 +38,66 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
           edad: 0,
           fechaIngreso: DateTime.now(),
         );
+        isLoading = false;
       });
       return;
     }
-    studentDatabase.read(widget.studentId!).then((value) {
-      setState(() {
-        student = value;
-        nameController.text = student.nombre;
-        majorController.text = student.carrera;
-        ageController.text = student.edad?.toString() ?? '';
-      });
-    });
+    try {
+      student = await studentDatabase.read(widget.studentId!);
+      nameController.text = student.nombre;
+      majorController.text = student.carrera;
+      ageController.text = student.edad?.toString() ?? '';
+    } catch (e) {
+      print('Error loading student: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading student: $e')),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   saveStudent() async {
-    setState(() {
-      isLoading = true;
-    });
-    final model = StudentModel(
-      id: isNewStudent ? null : student.id,
-      nombre: nameController.text,
-      carrera: majorController.text,
-      edad: int.tryParse(ageController.text) ?? 0,
-      fechaIngreso: DateTime.now(),
-    );
-    if (isNewStudent) {
-      await studentDatabase.create(model);
-    } else {
-      await studentDatabase.update(model);
+    setState(() => isLoading = true);
+    try {
+      final model = StudentModel(
+        id: isNewStudent ? null : student.id,
+        nombre: nameController.text,
+        carrera: majorController.text,
+        edad: int.tryParse(ageController.text) ?? 0,
+        fechaIngreso: DateTime.now(),
+      );
+      if (isNewStudent) {
+        await studentDatabase.create(model);
+      } else {
+        await studentDatabase.update(model);
+      }
+      await studentDatabase.syncWithServer();
+      Navigator.pop(context, true);
+    } catch (e) {
+      print('Error saving student: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving student: $e')),
+      );
+    } finally {
+      setState(() => isLoading = false);
     }
-    setState(() {
-      isLoading = false;
-    });
-    Navigator.pop(context);
   }
 
   deleteStudent() async {
-    await studentDatabase.delete(student.id!);
-    Navigator.pop(context);
+    setState(() => isLoading = true);
+    try {
+      await studentDatabase.delete(student.id!);
+      await studentDatabase.syncWithServer();
+      Navigator.pop(context, true);
+    } catch (e) {
+      print('Error deleting student: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting student: $e')),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   @override
@@ -114,19 +137,17 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
                       hintText: 'Ingrese su nombre',
                       border: InputBorder.none,
                       hintStyle: TextStyle(
-                        //Hint text opacity
                         color: Colors.white.withOpacity(0.2),
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
                       ),
-                      //Background opacity
                       fillColor: Colors.white.withOpacity(0.1),
                       filled: true,
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     ),
                   ),
-                  SizedBox(height: 10), // Add this line
+                  SizedBox(height: 10),
                   TextField(
                     controller: majorController,
                     cursorColor: Colors.white,

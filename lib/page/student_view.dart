@@ -1,7 +1,7 @@
-import 'package:multi_sem13/student.dart';
-import 'package:multi_sem13/student_database.dart';
-import 'package:multi_sem13/student_details_view.dart';
 import 'package:flutter/material.dart';
+import 'package:multi_sem13/model/student.dart';
+import 'package:multi_sem13/data/student_database.dart';
+import 'package:multi_sem13/page/student_details_view.dart';
 
 class StudentsView extends StatefulWidget {
   const StudentsView({Key? key}) : super(key: key);
