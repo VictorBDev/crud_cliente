@@ -1,86 +1,110 @@
 import 'package:flutter/material.dart';
-import 'package:multi_sem13/data/student_database.dart';
 import 'package:multi_sem13/model/student.dart';
+import 'package:multi_sem13/data/student_database.dart';
 import 'package:multi_sem13/page/student_details_view.dart';
 
 class StudentsView extends StatefulWidget {
   const StudentsView({Key? key}) : super(key: key);
 
   @override
-  _StudentsViewState createState() => _StudentsViewState();
+  State<StudentsView> createState() => _StudentsViewState();
 }
 
 class _StudentsViewState extends State<StudentsView> {
   StudentDatabase studentDatabase = StudentDatabase.instance;
+
   List<StudentModel> students = [];
-  bool isLoading = false;
 
   @override
   void initState() {
-    super.initState();
     refreshStudents();
+    super.initState();
   }
 
-  Future<void> refreshStudents() async {
-    setState(() => isLoading = true);
-    try {
-      await studentDatabase.syncWithServer();
-      students = await studentDatabase.readAll();
-    } catch (e) {
-      print('Error refreshing students: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error refreshing students: $e')),
-      );
-    } finally {
-      setState(() => isLoading = false);
-    }
+  @override
+  dispose() {
+    studentDatabase.close();
+    super.dispose();
   }
 
-  Future<void> _navigateToAddStudentPage() async {
-    final result = await Navigator.push(
+  refreshStudents() {
+    studentDatabase.readAll().then((value) {
+      setState(() {
+        students = value;
+      });
+    });
+  }
+
+  goToStudentDetailsView({int? id}) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => StudentDetailsView(),
-      ),
+          builder: (context) => StudentDetailsView(studentId: id)),
     );
-
-    if (result == true) {
-      await refreshStudents();
-    }
+    refreshStudents();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black87,
       appBar: AppBar(
+        backgroundColor: Colors.black87,
         title: const Text('Lista de Estudiantes'),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.search),
+          ),
+        ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: students.length,
-              itemBuilder: (context, index) {
-                final student = students[index];
-                return ListTile(
-                  title: Text(student.nombre),
-                  subtitle: Text(student.carrera),
-                  onTap: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            StudentDetailsView(studentId: student.id),
+      body: Center(
+        child: students.isEmpty
+            ? const Text(
+                'No hay estudiantes aún',
+                style: TextStyle(color: Colors.white),
+              )
+            : ListView.builder(
+                itemCount: students.length,
+                itemBuilder: (context, index) {
+                  final student = students[index];
+                  return GestureDetector(
+                    onTap: () => goToStudentDetailsView(id: student.id),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                student.fechaIngreso.toString().split(' ')[0],
+                              ),
+                              Text(
+                                'Nombre: ${student.nombre}',
+                                style:
+                                    Theme.of(context).textTheme.headlineMedium,
+                              ),
+                              Text(
+                                'Carrera: ${student.carrera}',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              Text(
+                                'Edad: ${student.edad}',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    );
-                    if (result == true) {
-                      await refreshStudents();
-                    }
-                  },
-                );
-              },
-            ),
+                    ),
+                  );
+                }),
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddStudentPage,
+        onPressed: () => goToStudentDetailsView(),
+        tooltip: 'Añadir Estudiante',
         child: const Icon(Icons.add),
       ),
     );

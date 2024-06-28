@@ -56,6 +56,28 @@ class StudentDatabase {
     }
   }
 
+  //new method
+  Future<StudentModel> read(int id) async {
+    if (kIsWeb) {
+      final students = await _storageService.getStudents();
+      return students.firstWhere((student) => student.id == id);
+    } else {
+      final db = await database;
+      final maps = await db.query(
+        StudentFields.tableName,
+        columns: StudentFields.values,
+        where: '${StudentFields.id} = ?',
+        whereArgs: [id],
+      );
+
+      if (maps.isNotEmpty) {
+        return StudentModel.fromJson(maps.first);
+      } else {
+        throw Exception('ID $id not found');
+      }
+    }
+  }
+
   Future<StudentModel> create(StudentModel student) async {
     if (kIsWeb) {
       final students = await _storageService.getStudents();
@@ -143,5 +165,11 @@ class StudentDatabase {
     } catch (e) {
       print('Error syncing with server: $e');
     }
+  }
+
+  //new method
+  Future<void> close() async {
+    final db = await database;
+    db.close();
   }
 }

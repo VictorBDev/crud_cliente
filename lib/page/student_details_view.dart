@@ -3,85 +3,88 @@ import 'package:multi_sem13/model/student.dart';
 import 'package:multi_sem13/data/student_database.dart';
 
 class StudentDetailsView extends StatefulWidget {
+  const StudentDetailsView({Key? key, this.studentId}) : super(key: key);
   final int? studentId;
 
-  const StudentDetailsView({Key? key, this.studentId}) : super(key: key);
-
   @override
-  _StudentDetailsViewState createState() => _StudentDetailsViewState();
+  State<StudentDetailsView> createState() => _StudentDetailsViewState();
 }
 
 class _StudentDetailsViewState extends State<StudentDetailsView> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-  late TextEditingController _majorController;
-  late TextEditingController _ageController;
-
   StudentDatabase studentDatabase = StudentDatabase.instance;
+
+  TextEditingController nameController = TextEditingController();
+  TextEditingController majorController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
+
+  late StudentModel student;
   bool isLoading = false;
   bool isNewStudent = false;
-  late StudentModel student;
 
   @override
   void initState() {
+    refreshStudent();
     super.initState();
-    isNewStudent = widget.studentId == null;
-    _nameController = TextEditingController();
-    _majorController = TextEditingController();
-    _ageController = TextEditingController();
-    if (!isNewStudent) {
-      loadStudent();
-    }
   }
 
-  void loadStudent() async {
+  refreshStudent() async {
     setState(() => isLoading = true);
+    if (widget.studentId == null) {
+      setState(() {
+        isNewStudent = true;
+        student = StudentModel(
+          nombre: '',
+          carrera: '',
+          edad: 0,
+          fechaIngreso: DateTime.now(),
+        );
+        isLoading = false;
+      });
+      return;
+    }
     try {
-      student = await studentDatabase.readAll().then(
-            (students) => students.firstWhere((s) => s.id == widget.studentId),
-          );
-      _nameController.text = student.nombre;
-      _majorController.text = student.carrera;
-      _ageController.text = student.edad.toString();
+      student = await studentDatabase.read(widget.studentId!);
+      nameController.text = student.nombre;
+      majorController.text = student.carrera;
+      ageController.text = student.edad?.toString() ?? '';
     } catch (e) {
       print('Error loading student: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading student: $e')),
+      );
     } finally {
       setState(() => isLoading = false);
     }
   }
 
-  Future<void> saveStudent() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => isLoading = true);
-      try {
-        final studentModel = StudentModel(
-          id: isNewStudent ? null : student.id,
-          nombre: _nameController.text,
-          carrera: _majorController.text,
-          edad: int.parse(_ageController.text),
-          fechaIngreso: DateTime.now(),
-        );
-
-        if (isNewStudent) {
-          await studentDatabase.create(studentModel);
-        } else {
-          await studentDatabase.update(studentModel);
-        }
-
-        await studentDatabase.syncWithServer();
-        Navigator.pop(context, true);
-      } catch (e) {
-        print('Error saving student: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving student: $e')),
-        );
-      } finally {
-        setState(() => isLoading = false);
+  saveStudent() async {
+    setState(() => isLoading = true);
+    try {
+      final model = StudentModel(
+        id: isNewStudent ? null : student.id,
+        nombre: nameController.text,
+        carrera: majorController.text,
+        edad: int.tryParse(ageController.text) ?? 0,
+        fechaIngreso: DateTime.now(),
+      );
+      if (isNewStudent) {
+        await studentDatabase.create(model);
+      } else {
+        await studentDatabase.update(model);
       }
+      await studentDatabase.syncWithServer();
+      Navigator.pop(context, true);
+    } catch (e) {
+      print('Error saving student: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving student: $e')),
+      );
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
-  Future<void> deleteStudent() async {
+  deleteStudent() async {
     setState(() => isLoading = true);
     try {
       await studentDatabase.delete(student.id!);
@@ -134,19 +137,17 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
                       hintText: 'Ingrese su nombre',
                       border: InputBorder.none,
                       hintStyle: TextStyle(
-                        //Hint text opacity
                         color: Colors.white.withOpacity(0.2),
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
                       ),
-                      //Background opacity
                       fillColor: Colors.white.withOpacity(0.1),
                       filled: true,
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     ),
                   ),
-                  SizedBox(height: 10), // Add this line
+                  SizedBox(height: 10),
                   TextField(
                     controller: majorController,
                     cursorColor: Colors.white,
