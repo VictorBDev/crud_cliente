@@ -1,55 +1,33 @@
-class StudentFields {
-  static const List<String> values = [
-    id,
-    nombre,
-    carrera,
-    edad,
-    fechaIngreso,
-  ];
-
-  static const String tableName = 'estudiantes';
-  static const String idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
-  static const String textType = 'TEXT NOT NULL';
-  static const String intType = 'INTEGER NOT NULL';
-  static const String id = '_id';
-  static const String nombre = 'nombre';
-  static const String carrera = 'carrera';
-  static const String edad = 'edad';
-  static const String fechaIngreso = 'fecha_ingreso';
-}
-
 class StudentModel {
-  int? id;
+  final int? id;
   final String nombre;
   final String carrera;
-  final int? edad;
-  final DateTime? fechaIngreso;
+  final int edad;
+  final DateTime fechaIngreso;
 
   StudentModel({
     this.id,
     required this.nombre,
     required this.carrera,
-    this.edad,
+    required this.edad,
     required this.fechaIngreso,
   });
 
-  Map<String, Object?> toJson() => {
-        StudentFields.id: id,
-        StudentFields.nombre: nombre,
-        StudentFields.carrera: carrera,
-        StudentFields.edad: edad,
-        StudentFields.fechaIngreso: fechaIngreso?.toIso8601String(),
-      };
-
   factory StudentModel.fromJson(Map<String, dynamic> json) => StudentModel(
-        id: json[StudentFields.id] as int?,
-        nombre: json[StudentFields.nombre] as String,
-        carrera: json[StudentFields.carrera] as String,
-        edad: json[StudentFields.edad] as int?,
-        fechaIngreso: json[StudentFields.fechaIngreso] != null
-            ? DateTime.parse(json[StudentFields.fechaIngreso] as String)
-            : null,
+        id: json['_id'] as int?,
+        nombre: json['nombre'] as String,
+        carrera: json['carrera'] as String,
+        edad: json['edad'] as int,
+        fechaIngreso: DateTime.parse(json['fecha_ingreso'] as String),
       );
+
+  Map<String, dynamic> toJson() => {
+        '_id': id,
+        'nombre': nombre,
+        'carrera': carrera,
+        'edad': edad,
+        'fecha_ingreso': fechaIngreso.toIso8601String(),
+      };
 
   StudentModel copy({
     int? id,
@@ -65,23 +43,4 @@ class StudentModel {
         edad: edad ?? this.edad,
         fechaIngreso: fechaIngreso ?? this.fechaIngreso,
       );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is StudentModel &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          nombre == other.nombre &&
-          carrera == other.carrera &&
-          edad == other.edad &&
-          fechaIngreso == other.fechaIngreso;
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      nombre.hashCode ^
-      carrera.hashCode ^
-      edad.hashCode ^
-      fechaIngreso.hashCode;
 }
