@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:multi_sem13/page/student_view.dart';
+import 'package:crud_cliente/page/student_view.dart';
 
 void main() {
   runApp(const MyApp());

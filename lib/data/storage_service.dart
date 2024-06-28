@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:multi_sem13/model/student.dart';
+import 'package:crud_cliente/model/student.dart';
 
 class StorageService {
   Future<List<StudentModel>> getStudents() async {

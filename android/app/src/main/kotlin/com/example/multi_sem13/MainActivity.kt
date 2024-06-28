@@ -1,4 +1,4 @@
-package com.example.multi_sem13
+package com.example.crud_cliente
 
 import io.flutter.embedding.android.FlutterActivity
 

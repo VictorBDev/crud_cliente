@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:multi_sem13/model/student.dart';
+import 'package:crud_cliente/model/student.dart';
 
 class ApiService {
   final String baseUrl;

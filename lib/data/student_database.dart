@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:multi_sem13/model/student.dart';
+import 'package:crud_cliente/model/student.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:multi_sem13/data/api_service.dart';
-import 'package:multi_sem13/data/storage_service.dart';
+import 'package:crud_cliente/data/api_service.dart';
+import 'package:crud_cliente/data/storage_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 //clase que contiene los campos de la tabla

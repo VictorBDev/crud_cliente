@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:multi_sem13/model/student.dart';
-import 'package:multi_sem13/data/api_service.dart';
+import 'package:crud_cliente/model/student.dart';
+import 'package:crud_cliente/data/api_service.dart';
 
 class StudentDetailsView extends StatefulWidget {
   const StudentDetailsView({Key? key, this.studentId, required this.apiService})

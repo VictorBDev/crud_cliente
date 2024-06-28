@@ -1,6 +1,6 @@
 {
-    "name": "multi_sem13",
-    "short_name": "multi_sem13",
+    "name": "crud_cliente",
+    "short_name": "crud_cliente",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
