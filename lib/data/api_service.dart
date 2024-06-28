@@ -5,15 +5,23 @@ import 'package:multi_sem13/model/student.dart';
 class ApiService {
   final String baseUrl;
 
-  ApiService({required this.baseUrl});
+  ApiService(
+      {this.baseUrl =
+          'http://192.168.1.11:3000'}); //usa la ip de servidor local
 
   Future<List<StudentModel>> getStudents() async {
-    final response = await http.get(Uri.parse('$baseUrl/students'));
-    if (response.statusCode == 200) {
-      List<dynamic> body = jsonDecode(response.body)['data'];
-      return body.map((dynamic item) => StudentModel.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load students');
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/students'));
+      if (response.statusCode == 200) {
+        List<dynamic> body = jsonDecode(response.body)['data'];
+        return body.map((dynamic item) => StudentModel.fromJson(item)).toList();
+      } else {
+        throw Exception(
+            'Failed to load students. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al obtener estudiantes: $e');
+      rethrow;
     }
   }
 
@@ -24,7 +32,14 @@ class ApiService {
       body: jsonEncode(student.toJson()),
     );
     if (response.statusCode == 200) {
-      return StudentModel.fromJson(jsonDecode(response.body)['data']);
+      Map<String, dynamic> data = jsonDecode(response.body)['data'];
+      return StudentModel(
+        id: data['id'],
+        nombre: student.nombre,
+        carrera: student.carrera,
+        edad: student.edad,
+        fechaIngreso: student.fechaIngreso,
+      );
     } else {
       throw Exception('Failed to create student');
     }

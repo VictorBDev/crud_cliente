@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:multi_sem13/model/student.dart';
-import 'package:multi_sem13/data/student_database.dart';
+import 'package:multi_sem13/data/api_service.dart';
 
 class StudentDetailsView extends StatefulWidget {
-  const StudentDetailsView({Key? key, this.studentId}) : super(key: key);
+  const StudentDetailsView({Key? key, this.studentId, required this.apiService})
+      : super(key: key);
   final int? studentId;
+  final ApiService apiService;
 
   @override
   State<StudentDetailsView> createState() => _StudentDetailsViewState();
 }
 
 class _StudentDetailsViewState extends State<StudentDetailsView> {
-  StudentDatabase studentDatabase = StudentDatabase.instance;
-
   TextEditingController nameController = TextEditingController();
   TextEditingController majorController = TextEditingController();
   TextEditingController ageController = TextEditingController();
@@ -23,12 +23,11 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
 
   @override
   void initState() {
-    refreshStudent();
     super.initState();
+    refreshStudent();
   }
 
   refreshStudent() async {
-    setState(() => isLoading = true);
     if (widget.studentId == null) {
       setState(() {
         isNewStudent = true;
@@ -38,22 +37,22 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
           edad: 0,
           fechaIngreso: DateTime.now(),
         );
-        isLoading = false;
       });
-      return;
-    }
-    try {
-      student = await studentDatabase.read(widget.studentId!);
-      nameController.text = student.nombre;
-      majorController.text = student.carrera;
-      ageController.text = student.edad?.toString() ?? '';
-    } catch (e) {
-      print('Error loading student: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading student: $e')),
-      );
-    } finally {
-      setState(() => isLoading = false);
+    } else {
+      setState(() => isLoading = true);
+      try {
+        final students = await widget.apiService.getStudents();
+        student = students.firstWhere((s) => s.id == widget.studentId);
+        nameController.text = student.nombre;
+        majorController.text = student.carrera;
+        ageController.text = student.edad.toString();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading student: $e')),
+        );
+      } finally {
+        setState(() => isLoading = false);
+      }
     }
   }
 
@@ -68,14 +67,12 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
         fechaIngreso: DateTime.now(),
       );
       if (isNewStudent) {
-        await studentDatabase.create(model);
+        await widget.apiService.createStudent(model);
       } else {
-        await studentDatabase.update(model);
+        await widget.apiService.updateStudent(model);
       }
-      await studentDatabase.syncWithServer();
       Navigator.pop(context, true);
     } catch (e) {
-      print('Error saving student: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error saving student: $e')),
       );
@@ -87,11 +84,9 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
   deleteStudent() async {
     setState(() => isLoading = true);
     try {
-      await studentDatabase.delete(student.id!);
-      await studentDatabase.syncWithServer();
+      await widget.apiService.deleteStudent(student.id!);
       Navigator.pop(context, true);
     } catch (e) {
-      print('Error deleting student: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error deleting student: $e')),
       );
@@ -147,7 +142,7 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
                           EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: majorController,
                     cursorColor: Colors.white,
@@ -168,7 +163,7 @@ class _StudentDetailsViewState extends State<StudentDetailsView> {
                           EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: ageController,
                     cursorColor: Colors.white,

@@ -6,6 +6,22 @@ import 'package:multi_sem13/data/api_service.dart';
 import 'package:multi_sem13/data/storage_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+//clase que contiene los campos de la tabla
+class StudentFields {
+  static const String tableName = 'estudiantes';
+  static const String id = '_id';
+  static const String nombre = 'nombre';
+  static const String carrera = 'carrera';
+  static const String edad = 'edad';
+  static const String fechaIngreso = 'fecha_ingreso';
+
+  static const String idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+  static const String textType = 'TEXT NOT NULL';
+  static const String intType = 'INTEGER NOT NULL';
+
+  static const List<String> values = [id, nombre, carrera, edad, fechaIngreso];
+}
+
 class StudentDatabase {
   static final StudentDatabase instance = StudentDatabase._internal();
   static Database? _database;
@@ -56,7 +72,6 @@ class StudentDatabase {
     }
   }
 
-  //new method
   Future<StudentModel> read(int id) async {
     if (kIsWeb) {
       final students = await _storageService.getStudents();
@@ -167,7 +182,6 @@ class StudentDatabase {
     }
   }
 
-  //new method
   Future<void> close() async {
     final db = await database;
     db.close();
